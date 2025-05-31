@@ -1,0 +1,77 @@
+@startuml
+
+package "model" {
+    class Evento {
+        -nome: String
+        -endereco: String
+        -categoria: Categoria
+        -horario: LocalDateTime
+        -descricao: String
+        -participantes: List<Usuario>
+        +adicionarParticipante(Usuario)
+        +removerParticipante(Usuario)
+        +toString(): String
+    }
+
+    class Usuario {
+        -nome: String
+        -email: String
+        -telefone: String
+        -eventosConfirmados: List<Evento>
+        +participarEvento(Evento)
+        +cancelarEvento(Evento)
+        +listarEventosParticipando()
+    }
+
+    enum Categoria {
+        FESTA
+        ESPORTE
+        SHOW
+        CONGRESSO
+    }
+}
+
+package "service" {
+    class EventoService {
+        -eventos: List<Evento>
+        +adicionarEvento(Evento)
+        +buscarPorNome(String): List<Evento>
+        +buscarPorCategoria(Categoria): List<Evento>
+        +buscarPorData(LocalDateTime): List<Evento>
+        +eventosFuturos(): List<Evento>
+        +eventosOcorrendoAgora(): List<Evento>
+        +eventosPassados(): List<Evento>
+        +verificarNotificacoes(Usuario)
+        +gerarRelatorioEventos()
+    }
+
+    class UsuarioService {
+        -usuarios: List<Usuario>
+        +adicionarUsuario(Usuario)
+        +buscarPorEmail(String): Usuario
+        +buscarPorNome(String): List<Usuario>
+        +gerarRelatorioParticipacao()
+        +gerarRelatorioCategorias()
+    }
+}
+
+package "util" {
+    class FileManager {
+        -eventosFileName: String
+        -usuariosFileName: String
+        +salvarEventos(EventoService)
+        +carregarEventos(): EventoService
+        +salvarUsuarios(UsuarioService)
+        +carregarUsuarios(): UsuarioService
+    }
+}
+
+Evento "1" -- "*" Usuario : participantes
+Usuario "1" -- "*" Evento : eventosConfirmados
+Evento "1" -- "1" Categoria : categoria
+EventoService "1" -- "*" Evento : gerencia
+UsuarioService "1" -- "*" Usuario : gerencia
+FileManager ..> EventoService : salva/carrega
+FileManager ..> UsuarioService : salva/carrega
+
+@enduml
